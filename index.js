@@ -1,5 +1,7 @@
 const { ApolloServer, gql, ApolloError } = require("apollo-server");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const jwtKey = "my_secret_key";
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -50,7 +52,16 @@ const resolvers = {
       const user = users.find((el) => el.email === args.email);
       console.log(user); // password is hashed
       if (user && bcrypt.compareSync(args.password, user.hash)) {
-        return "success";
+        const token = jwt.sign(
+          {
+            user: user.email,
+          },
+          jwtKey,
+          {
+            algorithm: "HS256",
+          }
+        );
+        return token;
       } else {
         throw new ApolloError("Invalid credentials");
       }
