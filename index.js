@@ -45,7 +45,14 @@ const users = [
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
   Query: {
-    books: () => books,
+    books: (parents, args, context, info) => {
+      console.log("context", context);
+      if (context.user) {
+        return books;
+      } else {
+        throw new ApolloError("Invalid auth");
+      }
+    },
   },
   Mutation: {
     login: (parent, args, context, info) => {
@@ -74,7 +81,19 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => {
-    console.log("auth", req.headers.authorization);
+    // console.log("auth", req.headers.authorization);
+    const token = req.headers.authorization;
+    if (token) {
+      // console.log("token", token);
+      let payload;
+      try {
+        payload = jwt.verify(token, jwtKey);
+        // console.log("payload", payload);
+        return { user: payload.user };
+      } catch (err) {
+        // console.log("invalid token");
+      }
+    }
   },
 });
 

@@ -1,1 +1,3 @@
+{books{title}}
 mutation {login(email: "admin@gmail.com", password: "p4ssw0rd")}
+{ "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjIyNjI0Nzc3fQ.vZHXYmvf5sWmivrqoeqmH5MA1tz0DRTUlEWMagJGqDQ"}
