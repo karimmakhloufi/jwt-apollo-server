@@ -1,4 +1,5 @@
 const { ApolloServer, gql, ApolloError } = require("apollo-server");
+const bcrypt = require("bcrypt");
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -34,7 +35,7 @@ const books = [
 const users = [
   {
     email: "admin@gmail.com",
-    password: "p4ssw0rd",
+    hash: bcrypt.hashSync("p4ssw0rd", 10),
   },
 ];
 
@@ -47,7 +48,8 @@ const resolvers = {
   Mutation: {
     login: (parent, args, context, info) => {
       const user = users.find((el) => el.email === args.email);
-      if (user && user.password === args.password) {
+      console.log(user); // password is hashed
+      if (user && bcrypt.compareSync(args.password, user.hash)) {
         return "success";
       } else {
         throw new ApolloError("Invalid credentials");
