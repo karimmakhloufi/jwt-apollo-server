@@ -70,8 +70,12 @@ const resolvers = {
             algorithm: "HS256",
           }
         );
-        context.res.cookie("token", token);
-        return "okay";
+        context.res.cookie("token", token, {
+          maxAge: 86_400_000, // try with 10_000
+          httpOnly: true, // if false, document.cookie in frontend works
+          secure: true, // only send to https or localhost
+        });
+        return "you are logged in";
       } else {
         throw new ApolloError("Invalid credentials");
       }
@@ -106,7 +110,7 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app, path: "/graphql", cors: false });
+server.applyMiddleware({ app, path: "/graphql", cors: false }); // we still use cors from the cors middleware, try to request from 192.168 to check
 app.listen(port, () => {
   console.log(`Graphql app listening at http://localhost:${port}/graphql`);
 });
