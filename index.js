@@ -3,6 +3,7 @@ const express = require("express");
 const { ApolloServer, gql, ApolloError } = require("apollo-server-express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 const jwtKey = "my_secret_key";
 
@@ -49,7 +50,6 @@ const users = [
 const resolvers = {
   Query: {
     books: (parents, args, context, info) => {
-      console.log("context", context);
       if (context.user) {
         return books;
       } else {
@@ -86,14 +86,24 @@ var corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ res }) => ({
-    res,
-  }),
+  context: ({ res, req }) => {
+    const token = req.cookies.token;
+    if (token) {
+      let payload;
+      try {
+        payload = jwt.verify(token, jwtKey);
+        return { res, user: payload.user };
+      } catch (err) {}
+    } else {
+      return { res };
+    }
+  },
 });
 
 server.applyMiddleware({ app, path: "/graphql", cors: false });
-app.listen({ port: 8000 });
+app.listen({ port: 4000 });
