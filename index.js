@@ -1,6 +1,9 @@
-const { ApolloServer, gql, ApolloError } = require("apollo-server");
+const cors = require("cors");
+const express = require("express");
+const { ApolloServer, gql, ApolloError } = require("apollo-server-express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const jwtKey = "my_secret_key";
 
 // A schema is a collection of type definitions (hence "typeDefs")
@@ -67,7 +70,8 @@ const resolvers = {
             algorithm: "HS256",
           }
         );
-        return token;
+        context.res.cookie("token", token);
+        return "okay";
       } else {
         throw new ApolloError("Invalid credentials");
       }
@@ -75,29 +79,21 @@ const resolvers = {
   },
 };
 
-// The ApolloServer constructor requires two parameters: your schema
-// definition and your set of resolvers.
+const app = express();
+
+var corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req }) => {
-    // console.log("auth", req.headers.authorization);
-    const token = req.headers.authorization;
-    if (token) {
-      // console.log("token", token);
-      let payload;
-      try {
-        payload = jwt.verify(token, jwtKey);
-        // console.log("payload", payload);
-        return { user: payload.user };
-      } catch (err) {
-        // console.log("invalid token");
-      }
-    }
-  },
+  context: ({ res }) => ({
+    res,
+  }),
 });
 
-// The `listen` method launches a web server.
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+server.applyMiddleware({ app, path: "/graphql", cors: false });
+app.listen({ port: 8000 });
