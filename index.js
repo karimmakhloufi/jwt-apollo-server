@@ -80,8 +80,9 @@ const resolvers = {
 };
 
 const app = express();
+const port = 4000;
 
-var corsOptions = {
+const corsOptions = {
   origin: "http://localhost:3000",
   credentials: true,
 };
@@ -106,4 +107,6 @@ const server = new ApolloServer({
 });
 
 server.applyMiddleware({ app, path: "/graphql", cors: false });
-app.listen({ port: 4000 });
+app.listen(port, () => {
+  console.log(`Graphql app listening at http://localhost:${port}/graphql`);
+});
