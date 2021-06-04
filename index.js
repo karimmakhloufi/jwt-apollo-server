@@ -38,7 +38,7 @@ const books = [
   },
 ];
 
-const users = [
+const usersDB = [
   {
     email: "admin@gmail.com",
     hash: bcrypt.hashSync("p4ssw0rd", 10),
@@ -50,7 +50,7 @@ const users = [
 const resolvers = {
   Query: {
     books: (parents, args, context, info) => {
-      if (context.user) {
+      if (context.authenticatedUserEmail) {
         return books;
       } else {
         throw new ApolloError("Invalid auth");
@@ -59,7 +59,7 @@ const resolvers = {
   },
   Mutation: {
     login: (parent, args, context, info) => {
-      const user = users.find((el) => el.email === args.email);
+      const user = usersDB.find((dbUser) => dbUser.email === args.email);
       if (user && bcrypt.compareSync(args.password, user.hash)) {
         const token = jwt.sign(
           {
@@ -102,7 +102,7 @@ const server = new ApolloServer({
       let payload;
       try {
         payload = jwt.verify(token, jwtKey);
-        return { res, user: payload.user };
+        return { res, authenticatedUserEmail: payload.user };
       } catch (err) {}
     } else {
       return { res };
