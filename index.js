@@ -1,11 +1,8 @@
-const cors = require("cors");
-const express = require("express");
-const { ApolloServer, gql, ApolloError } = require("apollo-server-express");
+const { ApolloServer, gql, ApolloError } = require("apollo-server");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
 
-const jwtKey = "my_secret_key";
+const jwtKey = "my_secret_key_that_must_be_very_long";
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -21,8 +18,6 @@ const typeDefs = gql`
   }
   type Query {
     books: [Book]
-  }
-  type Mutation {
     login(email: String, password: String): String
   }
 `;
@@ -56,8 +51,6 @@ const resolvers = {
         throw new ApolloError("Invalid auth");
       }
     },
-  },
-  Mutation: {
     login: (parent, args, context, info) => {
       const user = usersDB.find((dbUser) => dbUser.email === args.email);
       if (user && bcrypt.compareSync(args.password, user.hash)) {
@@ -70,12 +63,7 @@ const resolvers = {
             algorithm: "HS256",
           }
         );
-        context.res.cookie("token", token, {
-          maxAge: 86_400_000, // try with 10_000
-          httpOnly: true, // if false, document.cookie in frontend works
-          secure: true, // only send to https or localhost
-        });
-        return "you are logged in";
+        return token;
       } else {
         throw new ApolloError("Invalid credentials");
       }
@@ -83,34 +71,21 @@ const resolvers = {
   },
 };
 
-const app = express();
-const port = 4000;
-
-const corsOptions = {
-  origin: "http://localhost:3000",
-  credentials: true,
-};
-app.use(cors(corsOptions));
-app.use(cookieParser());
-
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ res, req }) => {
-    const token = req.cookies.token;
+  context: ({ req }) => {
+    const token = req.headers.authorization;
     if (token) {
       let payload;
       try {
         payload = jwt.verify(token, jwtKey);
-        return { res, authenticatedUserEmail: payload.user };
+        return { authenticatedUserEmail: payload.user };
       } catch (err) {}
-    } else {
-      return { res };
     }
   },
 });
 
-server.applyMiddleware({ app, path: "/graphql", cors: false }); // we still use cors from the cors middleware, try to request from 192.168 to check
-app.listen(port, () => {
-  console.log(`Graphql app listening at http://localhost:${port}/graphql`);
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
 });

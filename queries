@@ -1,5 +1,5 @@
 {books{title}}
-mutation {login(email: "admin@gmail.com", password: "p4ssw0rd")}
-{ "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjIyNjI0Nzc3fQ.vZHXYmvf5sWmivrqoeqmH5MA1tz0DRTUlEWMagJGqDQ"}
+{login(email:"admin@gmail.com", password:"p4ssw0rd")}
+{ "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjI2ODkxNjU5fQ.Ako6uUTBPn6gumiYgc0J_Dn8BMrPmmNXQF6iDt5i37M"}
 
 Don't forget to activate cookies in settings
