@@ -12,10 +12,6 @@ const typeDefs = gql`
     title: String
     author: String
   }
-  type User {
-    email: String
-    password: String
-  }
   type Query {
     books: [Book]
     login(email: String, password: String): String
@@ -65,6 +61,7 @@ const resolvers = {
         throw new ApolloError("Invalid credentials");
       }
     },
+    // add register
   },
 };
 
