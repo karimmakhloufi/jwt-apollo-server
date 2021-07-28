@@ -58,10 +58,7 @@ const resolvers = {
           {
             user: user.email,
           },
-          jwtKey,
-          {
-            algorithm: "HS256",
-          }
+          jwtKey
         );
         return token;
       } else {
